@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1032958347947",
+    "firebase_url": "https://equi-split-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    "project_id": "equi-split",
+    "storage_bucket": "equi-split.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1032958347947:android:ad21e2fd6475bbe2aa85ee",
+        "android_client_info": {
+          "package_name": "com.example.splitwise_sdp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1032958347947-s39l8f5ae1eihpoc26251hd95a3hp4ng.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsDNZTtRf11aRjt9jCQgXEWXojQTnMC2g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1032958347947-s39l8f5ae1eihpoc26251hd95a3hp4ng.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1032958347947-f130dd50unom65rr51jhjhdun83544d8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.splitwiseSdp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
