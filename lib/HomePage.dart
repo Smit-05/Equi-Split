@@ -1,119 +1,353 @@
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:splitwise_sdp/Profile.dart';
 import 'package:splitwise_sdp/AddExpense.dart';
+import 'package:splitwise_sdp/main.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+HomePage({Key? key}) : super(key: key);
 
-  @override
-  State<HomePage> createState() => _BodyState();
+@override
+State<HomePage> createState() => _BodyState();
 }
 
 class _BodyState extends State<HomePage> {
-  final TextEditingController _textFieldController = TextEditingController();
-  final _dbref = FirebaseDatabase.instance.ref();
+final TextEditingController _textFieldController = TextEditingController();
+final friendController = TextEditingController();
+final db = FirebaseFirestore.instance;
 
-  late Map<String,dynamic> data;
-
+// late List expenses;
   _BodyState(){
-    getUserData();
+    // getzeroData();
   }
-
   @override
   initState(){
-    getUserData();
+    // getUserData();
+
   }
 
   @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      backgroundColor: Colors.grey[350],
-      appBar: AppBar(
-        backgroundColor: Colors.greenAccent[400],
-        title: Row(
-          children: [
-            Icon(
-              Icons.account_balance_wallet,
-              color: Colors.black54,
-              size: 25,
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(5, 0, 0, 0),
-              child: Text("Equi-Split",
-                  style: GoogleFonts.acme(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1)),
-            ),
-          ],
-        ),
-        elevation: 10,
-        foregroundColor: Colors.white,
-      ),
-      body: Container(
-        child: Column(
-          children: [
-            // for(var value)
-            // data.forEach((key, value) => Text(value)
-              Text(data['email'])
-          ],
-        ),
-      ),
+  void dispose() {
+    friendController.dispose();
+    super.dispose();
+    print("dispose called");
+  }
 
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddExpense()));
-        },
-        label: Text("Add Expense"),
-        icon: Icon(Icons.document_scanner_sharp),
-        backgroundColor: Colors.blueAccent[400],
-        elevation: 10,
+@override
+Widget build(BuildContext context) {
 
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                onPressed: getUserData,
-                icon: Icon(Icons.home,
-                  size: 30,),
-              ),
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Profile()),
-                  );
-                },
-                icon: Icon(Icons.person,
-                  size: 30,),
-              ),
-            ],
+  return Scaffold(
+    backgroundColor: Colors.grey[350],
+    appBar: AppBar(
+      backgroundColor: Colors.black54,
+      title: Row(
+        children: [
+          Icon(
+            Icons.account_balance_wallet,
+            color: Colors.white54,
+            size: 25,
           ),
-        ),
-        color: Colors.greenAccent[400],
-        elevation: 1,
+          Container(
+            margin: EdgeInsets.fromLTRB(5, 0, 0, 0),
+            child: Text("Equi-Split",
+                style: GoogleFonts.acme(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1)),
+          ),
+        ],
       ),
-    );
-  }
+      elevation: 10,
+      foregroundColor: Colors.white,
+    ),
+    body: Container(
+      child: Column(
+        children: [
+          StreamBuilder(
+              stream: db.collection('${FirebaseAuth.instance.currentUser!.uid}').doc('user-expenses').collection('expenses').orderBy('date',descending: true).snapshots(),
+              builder: (context,AsyncSnapshot<QuerySnapshot> snapshot){
+              if(snapshot.hasData){
 
-  void getUserData() async {
-    final user = FirebaseAuth.instance.currentUser!;
-    final snapshot = await _dbref.child("users/${user.uid}").get();
-    print(snapshot.value);
-    data = snapshot.value as Map<String, dynamic>;
+                return Expanded(child:
+                ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: ( context ,index) {
+                      final DocumentSnapshot docsnap = snapshot.data!.docs[index];
+                      // return ListTile(
+                      //     title: Text(docsnap['exp_name'])
+                      // );
+                      return ListCards(docsnap['exp_name'], docsnap['amount'],docsnap['date']);
+                    }
+                ));
+              }else{
+                return Center(child: CircularProgressIndicator());
+              }
+          }),
 
-  }
+        ],
+      ),
+    ),
 
+
+    floatingActionButton: FloatingActionButton.extended(
+      onPressed: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context) => AddExpense(FirebaseAuth.instance.currentUser!.uid)));
+      },
+      label: Text("Add Expense"),
+      icon: Icon(Icons.document_scanner_sharp),
+      backgroundColor: Colors.blueAccent[400],
+      elevation: 10,
+
+    ),
+    bottomNavigationBar:
+
+    BottomAppBar(
+      color: Colors.black54,
+      elevation: 1,
+      child: Container(
+        height: 60,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+          children: [
+            IconButton(
+              onPressed: (){},
+              icon: Icon(Icons.home,
+                size: 30),
+            ),
+            IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15))
+                      ),
+                      title: Text("Add Friend's Name",
+                      style: GoogleFonts.acme(
+                        fontSize: 25
+                      ),),
+                      content: Container(
+                      height: MediaQuery.of(context).size.height/5,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: friendController,
+                            decoration: InputDecoration(
+                              border: UnderlineInputBorder(),
+                              hintText: 'Name',
+                            ),
+                          ),
+                          SizedBox(height: 35),
+                          Material(
+                            color: Colors.deepOrangeAccent,
+                            borderRadius: BorderRadius.circular(50),
+                            child: InkWell(
+                                onTap: () async {
+                                  // List tobeupdated = [];
+                                  QuerySnapshot qs = await db.collection(FirebaseAuth.instance.currentUser!.uid).get();
+                                  List tobeupdated = qs.docs.map((e) => e.data()).toList();
+                                  List next = tobeupdated[0]['userFriend'];
+                                  next.add(friendController.text);
+                                  db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-details')
+                                      .update({"userFriend" : next}).then((value) => print("Friend was added"));
+
+                                  navigatorKey.currentState!.popUntil((route)=>route.isFirst);
+                                  },
+                                borderRadius: BorderRadius.circular(50),
+                                child: Container(
+                                    width: 200,
+                                    height: 45,
+                                    alignment: Alignment.center,
+                                    child: Text('Add Friend',),
+                                    ),
+                                ),
+                          ),
+
+                        ],
+                      ),
+                    ),
+                    );
+                  },
+
+                );
+              },
+              icon: Icon(Icons.person_add_alt_1_sharp,
+                  size: 30),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Profile()),
+                );
+              },
+              icon: Icon(Icons.person,
+                size: 30,),
+            ),
+
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+
+
+Widget ListCards(String exp_name,double amount,int date ){
+  return InkWell(
+    onTap: (){
+      showDialog(context: context, builder: (context) {
+        return AlertDialog(
+          // content: Text(exp_name),
+          title: Text(exp_name,
+            style: GoogleFonts.acme(
+              fontSize: 25
+            ),
+          ),
+          titleTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.black,fontSize: 20),
+          backgroundColor: Colors.greenAccent,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20))
+          ),
+          content: Container(
+            height: MediaQuery.of(context).size.height*0.15,
+            child:Row(
+                  children: [
+                    Column(
+                      children: [
+                        Text("Amount : $amount",
+                          style: GoogleFonts.acme(
+                            fontSize: 17
+                          ),
+                        ),
+                        SizedBox(height: 5,),
+                        Text('${DateFormat.yMMMMd('en_US').format(DateTime.fromMicrosecondsSinceEpoch(date))}',
+                            style: GoogleFonts.acme(
+                            fontSize: 17
+                          ),
+                        ),
+                        SizedBox(height: 50,),
+
+                      ],
+                    ),
+                    FloatingActionButton.extended(
+                        onPressed: () async {
+                          await db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-expenses').collection('expenses').doc('$date').delete().then((value) => print("Deleted"));
+                          navigatorKey.currentState!.popUntil((route)=>route.isFirst);
+                        },
+                        icon: Icon(
+                            FontAwesomeIcons.trash
+                        ),
+                        label: Text("Delete"),
+                        backgroundColor: Colors.red,
+                      ),
+                  ],
+                ),
+          )
+        );
+      });
+    },
+    child: Card(
+      elevation: 10,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width-30,
+        height: 100,
+        child: Stack(
+          children: [
+            Positioned(
+                top: 25,
+                left: 10,
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.tealAccent,
+                  child: Icon(FontAwesomeIcons.fileInvoiceDollar,
+                    size: 30,
+                    color: Colors.red,),
+                )
+            ),
+            Positioned(
+                top: 25,
+                left: 80,
+                child: Text(exp_name,
+                  style: GoogleFonts.acme(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1),)
+            ),
+            Positioned(
+                top: 25,
+                right: 45,
+                child: Row(
+                  children: [
+                    Icon(
+                      FontAwesomeIcons.indianRupeeSign,
+                      size: 17,
+                    ),
+                    Text(amount.toString(),
+                      style: GoogleFonts.acme(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 1),
+                    )
+                  ],
+                )
+            ),
+          ],
+        ),
+
+      ),
+    ),
+  );
+}
 
 }
 
+
+// Future getUserData() async {
+//   expenses = [];
+//       await db.collection('expenses')
+//           .doc(FirebaseAuth.instance.currentUser!.uid)
+//           .get()
+//           .then((snapshot) => {
+//         expenses.add({
+//           "exp_name" : snapshot.data()!['exp_name'],
+//           "amount" : snapshot.data()!['amount'],
+//           "date" : snapshot.data()!['date'],
+//           "userId" : snapshot.data()!['userId'],
+//           "userAmong" : snapshot.data()!['userAmong'],
+//         })
+//       });
+//       setState((){});
+// }
+
+// Future getzeroData() async {
+//   expenses = [];
+//   QuerySnapshot qs = await db.collection('expenses')
+//       .doc(FirebaseAuth.instance.currentUser!.uid)
+//       .collection(0.toString())
+//       .get();
+//
+//   expenses = qs.docs.map((e) => e.data()).toList();
+//       .then((snapshot) => {
+//     expenses.add({
+//       "exp_name" : snapshot.data()!['exp_name'],
+//       "amount" : snapshot.data()!['amount'],
+//       "date" : snapshot.data()!['date'],
+//       "userId" : snapshot.data()!['userId'],
+//       "userAmong" : snapshot.data()!['userAmong'],
+//     })
+//   });
+
+// }

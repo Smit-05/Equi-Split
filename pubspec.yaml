@@ -37,7 +37,8 @@ dependencies:
   google_fonts: ^3.0.1
   firebase_core: ^1.23.0
   firebase_auth: ^3.10.0
-  firebase_database: ^9.1.7
+  cloud_firestore: ^3.5.1
+  font_awesome_flutter: ^10.2.1
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +50,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  build_runner: ^2.3.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

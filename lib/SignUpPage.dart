@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:splitwise_sdp/main.dart';
+import 'package:splitwise_sdp/UserDetails.dart';
 
 class SignUpPage extends StatefulWidget {
   final Function() onClickedSignIn;
@@ -22,8 +23,10 @@ class _SignUpPageState extends State<SignUpPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _nameController = TextEditingController();
 
-  final _dbref = FirebaseDatabase.instance.ref();
+
+  final _db = FirebaseFirestore.instance;
 
   @override
   void dispose() {
@@ -35,7 +38,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         backgroundColor: Colors.grey[300],
         body: SafeArea(
@@ -60,6 +62,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
                 SizedBox(height: 50),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Container(
@@ -173,11 +176,11 @@ class _SignUpPageState extends State<SignUpPage> {
               ],
             ),
           ),
-        ));
+        )
+    );
   }
 
   Future signUp() async {
-
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -189,19 +192,18 @@ class _SignUpPageState extends State<SignUpPage> {
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text.trim()
-        );
-        final user = FirebaseAuth.instance.currentUser!;
-        final users = _dbref.child("users/${user.uid}");
-        await users.set({
-          "email" : user.email,
-        });
+        ).then((value) => Navigator.push(context, MaterialPageRoute(builder: (context) => UserDetails())));
 
+        // final users = Users(id: user.uid,name:_nameController.text,email: _emailController.text);
+        // users.setUsers();
+        // _db.collection("users").add(user).then((value) => print("User was added"));
       } else {
         print("Password didn't match");
       }
     } on Exception catch (e) {
       print(e);
     }
-    navigatorKey.currentState!.popUntil((route) => route.isFirst);
+
+
   }
 }
