@@ -11,6 +11,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  /// Instance of Firestore Cloud
   final db = FirebaseFirestore.instance;
 
   @override
@@ -82,14 +83,6 @@ class _ProfileState extends State<Profile> {
                   }
 
                 })
-            // showData(FontAwesomeIcons.user,
-            //     "Anonymous User"),
-            // showData(FontAwesomeIcons.envelope,
-            //     "Anonymous Email"),
-            // showData(FontAwesomeIcons.table,
-            //     "Anonymous Sem" " sem"),
-            // showData(FontAwesomeIcons.networkWired,
-            //     "Anonymous department"),
           ],
         ),
         );
@@ -135,7 +128,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-
+  /// Used to signout current user
   void signOut(){
     FirebaseAuth.instance.signOut();
     Navigator.pop(context);

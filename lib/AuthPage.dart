@@ -9,6 +9,7 @@ class AuthPage extends StatefulWidget {
   State<AuthPage> createState() => _AuthPageState();
 }
 
+/// This class helps to toggle between LoginPage and SignupPage
 class _AuthPageState extends State<AuthPage> {
   bool isLogin = true;
 

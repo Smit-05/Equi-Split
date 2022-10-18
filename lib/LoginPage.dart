@@ -17,10 +17,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  /// TextEditingController takes the input value from TextFields
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
 
+  /// dispose() is used to clear the data once user leaves the screen
   @override
   void dispose(){
     emailController.dispose();
@@ -119,15 +120,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    // child: Center(
-                    //   child: Text("Sign in",
-                    //     style: TextStyle(
-                    //       color: Colors.white,
-                    //       fontWeight: FontWeight.bold,
-                    //       fontSize: 18,
-                    //     ),
-                    //   ),
-                    // )
                   )
               ),
             ),
@@ -154,19 +146,6 @@ class _LoginPageState extends State<LoginPage> {
                       ]
                       )
                     ),
-                  // Text(
-                    //   "Not a Member?",
-                    //   style: TextStyle(
-                    //       fontWeight: FontWeight.bold
-                    //   ),
-                    // ),
-                    // Text(
-                    //   " Register Now",
-                    //   style: TextStyle(
-                    //       color: Colors.blue,
-                    //       fontWeight: FontWeight.bold
-                    //   ),
-                    // ),
                   ]
               ),
 
@@ -176,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
         )
     );
   }
-
+  /// Reads input data from the user for signin
   Future signIn() async {
     showDialog(
         context: context,
@@ -184,6 +163,7 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context) => Center(child:CircularProgressIndicator())
     );
     try {
+      /// Checks whether the user is present
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email:emailController.text.trim(),
         password: passwordController.text.trim()

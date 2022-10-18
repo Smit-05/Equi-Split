@@ -29,7 +29,8 @@ class _AddExpenseState extends State<AddExpense> {
   void initState() {
     // TODO: implement initState
     // getUserFriend();
-    getUserFriend();
+    getUserFriend().then((value) => setState((){}));
+    print("Over here");
     super.initState();
   }
 
@@ -139,12 +140,6 @@ class _AddExpenseState extends State<AddExpense> {
                               itemBuilder: (context,index){
                                 return FriendsCheckBox(checked[index], friends[index], index);
                       })
-
-
-
-                      // for(var i=1;i<friends.length;i++)
-                      //   FriendsCheckBox(checked[i], friends[i], i),
-
                     ],
                   ),
                 )
@@ -190,17 +185,10 @@ class _AddExpenseState extends State<AddExpense> {
     both = [];
     QuerySnapshot qs = await db.collection(FirebaseAuth.instance.currentUser!.uid).get();
     List tobeupdated = qs.docs.map((e) => e.data()).toList();
-    print(tobeupdated);
     friends = tobeupdated[0]['userFriend'];
-    // print(tobeupdated[0]['userFriend']);
     for(var i=0;i<friends.length;i++){
       checked.add(false);
     }
-    friends.removeAt(0);
-    checked.removeAt(0);
-    setState((){});
 
-
-    // print("Hello");
   }
 }

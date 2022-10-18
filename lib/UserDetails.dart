@@ -73,12 +73,14 @@ class _UserDetailsState extends State<UserDetails> {
     );
   }
 
+  /// Sets user information
   Future setUserInfo() async {
     final db = FirebaseFirestore.instance;
     final userdetails = <String,dynamic>{
       "name" : _nameController.text,
       "email" : FirebaseAuth.instance.currentUser!.email,
-      "mobile" : _mobileController.text
+      "mobile" : _mobileController.text,
+      "userFriend" : []
     };
     db.collection(FirebaseAuth.instance.currentUser!.uid)
         .doc('user-details')

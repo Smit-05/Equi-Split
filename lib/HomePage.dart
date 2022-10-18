@@ -24,14 +24,6 @@ final db = FirebaseFirestore.instance;
 final nf = NumberFormat();
 late List friends;
 
-  _BodyState(){
-    // getzeroData();
-
-  }
-  @override
-  initState(){
-    // getUserData();
-  }
 
   @override
   void dispose() {
@@ -72,6 +64,7 @@ Widget build(BuildContext context) {
     body: Container(
       child: Column(
         children: [
+          /// Renders the ListView according to the stream
           StreamBuilder(
               stream: db.collection('${FirebaseAuth.instance.currentUser!.uid}').doc('user-expenses').collection('expenses').orderBy('date',descending: true).snapshots(),
               builder: (context,AsyncSnapshot<QuerySnapshot> snapshot){
@@ -153,11 +146,12 @@ Widget build(BuildContext context) {
                             borderRadius: BorderRadius.circular(50),
                             child: InkWell(
                                 onTap: () async {
-                                  // List tobeupdated = [];
                                   QuerySnapshot qs = await db.collection(FirebaseAuth.instance.currentUser!.uid).get();
                                   List tobeupdated = qs.docs.map((e) => e.data()).toList();
                                   List next = tobeupdated[0]['userFriend'];
                                   next.add(friendController.text);
+
+                                  /// Updates specified value
                                   db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-details')
                                       .update({"userFriend" : next}).then((value) => print("Friend was added"));
 
@@ -270,13 +264,11 @@ Widget ListCards(String exp_name,double amount,int date, BuildContext context){
                           children: [
                             Text(friends[i],
                               style: GoogleFonts.acme(
-
                               ),
                             ),
                             SizedBox(width: 20,),
                             Text('${nf.format(amount / (friends.length + 1))}',
                               style: GoogleFonts.acme(
-
                               ),
                             ),
                             SizedBox(height: 20,),
@@ -284,9 +276,6 @@ Widget ListCards(String exp_name,double amount,int date, BuildContext context){
                         )
                       ],
                     ),
-
-
-
 
                   SizedBox(height: 20,),
                   FloatingActionButton.extended(
@@ -360,66 +349,17 @@ Widget ListCards(String exp_name,double amount,int date, BuildContext context){
     ),
   );
 }
-
+  /// Finds the splitting partners of expense
   Future getUserAmong(int date) async {
     friends = [];
     await db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-expenses').collection('expenses').doc('$date')
         .get().then((value){
             friends = value.data()!['userAmong'];
-
     }
     );
     setState((){});
-    // QuerySnapshot qs = await db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-expenses').collection('expenses').get();
-    // List tobeupdated = qs.docs.map((e) => e.data()).toList();
-    // print(tobeupdated);
-    // friends = tobeupdated[0]['userFriend'];
-    // print(tobeupdated[0]['userFriend']);
-
-    // friends.removeAt(0);
-
-
-    print(friends);
-
-
-    // print("Hello");
   }
 }
 
 
-// Future getUserData() async {
-//   expenses = [];
-//       await db.collection('expenses')
-//           .doc(FirebaseAuth.instance.currentUser!.uid)
-//           .get()
-//           .then((snapshot) => {
-//         expenses.add({
-//           "exp_name" : snapshot.data()!['exp_name'],
-//           "amount" : snapshot.data()!['amount'],
-//           "date" : snapshot.data()!['date'],
-//           "userId" : snapshot.data()!['userId'],
-//           "userAmong" : snapshot.data()!['userAmong'],
-//         })
-//       });
-//       setState((){});
-// }
 
-// Future getzeroData() async {
-//   expenses = [];
-//   QuerySnapshot qs = await db.collection('expenses')
-//       .doc(FirebaseAuth.instance.currentUser!.uid)
-//       .collection(0.toString())
-//       .get();
-//
-//   expenses = qs.docs.map((e) => e.data()).toList();
-//       .then((snapshot) => {
-//     expenses.add({
-//       "exp_name" : snapshot.data()!['exp_name'],
-//       "amount" : snapshot.data()!['amount'],
-//       "date" : snapshot.data()!['date'],
-//       "userId" : snapshot.data()!['userId'],
-//       "userAmong" : snapshot.data()!['userAmong'],
-//     })
-//   });
-
-// }

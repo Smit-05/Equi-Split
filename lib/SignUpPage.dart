@@ -20,6 +20,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -142,15 +143,6 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                         ),
-                        // child: Center(
-                        //   child: Text("Sign in",
-                        //     style: TextStyle(
-                        //       color: Colors.white,
-                        //       fontWeight: FontWeight.bold,
-                        //       fontSize: 18,
-                        //     ),
-                        //   ),
-                        // )
                       )),
                 ),
                 SizedBox(height: 25),
@@ -180,6 +172,7 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  /// Insert new user to Firebase
   Future signUp() async {
     showDialog(
         context: context,
@@ -194,16 +187,11 @@ class _SignUpPageState extends State<SignUpPage> {
             password: _passwordController.text.trim()
         ).then((value) => Navigator.push(context, MaterialPageRoute(builder: (context) => UserDetails())));
 
-        // final users = Users(id: user.uid,name:_nameController.text,email: _emailController.text);
-        // users.setUsers();
-        // _db.collection("users").add(user).then((value) => print("User was added"));
       } else {
         print("Password didn't match");
       }
     } on Exception catch (e) {
       print(e);
     }
-
-
   }
 }
