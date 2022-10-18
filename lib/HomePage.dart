@@ -21,15 +21,16 @@ class _BodyState extends State<HomePage> {
 final TextEditingController _textFieldController = TextEditingController();
 final friendController = TextEditingController();
 final db = FirebaseFirestore.instance;
+final nf = NumberFormat();
+late List friends;
 
-// late List expenses;
   _BodyState(){
     // getzeroData();
+
   }
   @override
   initState(){
     // getUserData();
-
   }
 
   @override
@@ -42,7 +43,8 @@ final db = FirebaseFirestore.instance;
 
 @override
 Widget build(BuildContext context) {
-
+  nf.maximumFractionDigits = 2;
+  nf.minimumFractionDigits = 0;
   return Scaffold(
     backgroundColor: Colors.grey[350],
     appBar: AppBar(
@@ -81,10 +83,7 @@ Widget build(BuildContext context) {
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: ( context ,index) {
                       final DocumentSnapshot docsnap = snapshot.data!.docs[index];
-                      // return ListTile(
-                      //     title: Text(docsnap['exp_name'])
-                      // );
-                      return ListCards(docsnap['exp_name'], docsnap['amount'],docsnap['date']);
+                      return ListCards(docsnap['exp_name'], docsnap['amount'],docsnap['date'],context);
                     }
                 ));
               }else{
@@ -205,15 +204,15 @@ Widget build(BuildContext context) {
 
 
 
-Widget ListCards(String exp_name,double amount,int date ){
+Widget ListCards(String exp_name,double amount,int date, BuildContext context){
   return InkWell(
-    onTap: (){
-      showDialog(context: context, builder: (context) {
+    onTap: () {
+      getUserAmong(date).then((value) => showDialog(context: context, builder: (context) {
         return AlertDialog(
           // content: Text(exp_name),
           title: Text(exp_name,
             style: GoogleFonts.acme(
-              fontSize: 25
+                fontSize: 25
             ),
           ),
           titleTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.black,fontSize: 20),
@@ -222,42 +221,92 @@ Widget ListCards(String exp_name,double amount,int date ){
               borderRadius: BorderRadius.all(Radius.circular(20))
           ),
           content: Container(
-            height: MediaQuery.of(context).size.height*0.15,
-            child:Row(
-                  children: [
-                    Column(
-                      children: [
-                        Text("Amount : $amount",
-                          style: GoogleFonts.acme(
-                            fontSize: 17
-                          ),
-                        ),
-                        SizedBox(height: 5,),
-                        Text('${DateFormat.yMMMMd('en_US').format(DateTime.fromMicrosecondsSinceEpoch(date))}',
+            // height: MediaQuery.of(context).size.height*0.25,
+              child:
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Amount : $amount",
+                    style: GoogleFonts.acme(
+                        fontSize: 17
+                    ),
+                  ),
+                  SizedBox(height: 5,),
+                  Text('${DateFormat.yMMMMd('en_US').format(DateTime.fromMicrosecondsSinceEpoch(date))}',
+                    style: GoogleFonts.acme(
+                        fontSize: 17
+                    ),
+                  ),
+                  SizedBox(height: 35,),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("People",
                             style: GoogleFonts.acme(
-                            fontSize: 17
-                          ),
-                        ),
-                        SizedBox(height: 50,),
 
+                            ),
+                          ),
+                          SizedBox(width: 20,),
+                          Text('Amount',
+                            style: GoogleFonts.acme(
+
+                            ),
+                          ),
+                          SizedBox(height: 20,),
+                        ],
+                      )
+                    ],
+                  ),
+                  for(var i=0;i<friends.length;i++)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Text(friends[i],
+                              style: GoogleFonts.acme(
+
+                              ),
+                            ),
+                            SizedBox(width: 20,),
+                            Text('${nf.format(amount / (friends.length + 1))}',
+                              style: GoogleFonts.acme(
+
+                              ),
+                            ),
+                            SizedBox(height: 20,),
+                          ],
+                        )
                       ],
                     ),
-                    FloatingActionButton.extended(
-                        onPressed: () async {
-                          await db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-expenses').collection('expenses').doc('$date').delete().then((value) => print("Deleted"));
-                          navigatorKey.currentState!.popUntil((route)=>route.isFirst);
-                        },
-                        icon: Icon(
-                            FontAwesomeIcons.trash
-                        ),
-                        label: Text("Delete"),
-                        backgroundColor: Colors.red,
-                      ),
-                  ],
-                ),
-          )
+
+
+
+
+                  SizedBox(height: 20,),
+                  FloatingActionButton.extended(
+                    onPressed: () async {
+                      await db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-expenses').collection('expenses').doc('$date').delete().then((value) => print("Deleted"));
+                      navigatorKey.currentState!.popUntil((route)=>route.isFirst);
+                    },
+                    icon: Icon(
+                        FontAwesomeIcons.trash
+                    ),
+                    label: Text("Delete"),
+                    backgroundColor: Colors.red,
+                  ),
+
+                ],
+
+              )
+          ),
         );
-      });
+      }));
     },
     child: Card(
       elevation: 10,
@@ -312,6 +361,29 @@ Widget ListCards(String exp_name,double amount,int date ){
   );
 }
 
+  Future getUserAmong(int date) async {
+    friends = [];
+    await db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-expenses').collection('expenses').doc('$date')
+        .get().then((value){
+            friends = value.data()!['userAmong'];
+
+    }
+    );
+    setState((){});
+    // QuerySnapshot qs = await db.collection(FirebaseAuth.instance.currentUser!.uid).doc('user-expenses').collection('expenses').get();
+    // List tobeupdated = qs.docs.map((e) => e.data()).toList();
+    // print(tobeupdated);
+    // friends = tobeupdated[0]['userFriend'];
+    // print(tobeupdated[0]['userFriend']);
+
+    // friends.removeAt(0);
+
+
+    print(friends);
+
+
+    // print("Hello");
+  }
 }
 
 

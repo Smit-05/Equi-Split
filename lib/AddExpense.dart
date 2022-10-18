@@ -6,8 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:splitwise_sdp/models/Expenses.dart';
-import 'package:splitwise_sdp/models/Users.dart';
 
 
 class AddExpense extends StatefulWidget {
@@ -26,11 +24,6 @@ class _AddExpenseState extends State<AddExpense> {
   late List<bool> checked ;
   late List friends;
   late List both;
-
-  _AddExpenseState() {
-
-    print("Constructor");
-  }
 
   @override
   void initState() {
@@ -79,74 +72,82 @@ class _AddExpenseState extends State<AddExpense> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children:[
-                    Container(
-                      width: 250,
-                        // decoration: BoxDecoration(
-                        //   color: Colors.grey[200],
-                        //   border: Border.all(color: Colors.white),
-                        //   borderRadius: BorderRadius.circular(12),
-                        // ),
-                        child: Padding(padding: const EdgeInsets.only(left: 20.0),
-                          child: TextField(
-                            controller: _expenseController,
-                            decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              hintText: 'Expense Name',
-                            ),
-                          ),
-                        )
-                    ),
-                    SizedBox(height: 10),
-                    Container(
+                Center(
+                  child: Column(
+                    children:[
+                      Container(
                         width: 250,
-                        // decoration: BoxDecoration(
-                        //   color: Colors.grey[200],
-                        //   border: Border.all(color: Colors.white),
-                        //   borderRadius: BorderRadius.circular(12),
-                        // ),
-                        child: Padding(padding: const EdgeInsets.only(left: 20.0),
+                          // decoration: BoxDecoration(
+                          //   color: Colors.grey[200],
+                          //   border: Border.all(color: Colors.white),
+                          //   borderRadius: BorderRadius.circular(12),
+                          // ),
                           child: TextField(
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            controller: _amountController,
-                            decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              hintText: 'Amount',
+                              controller: _expenseController,
+                              decoration: InputDecoration(
+                                border: UnderlineInputBorder(),
+                                hintText: 'Expense Name',
+                              ),
                             ),
-                          ),
-                        )
-                    ),
-                    SizedBox(height: 10),
-                    ElevatedButton(
-                        onPressed: () {
-                          int date = DateTime.now().microsecondsSinceEpoch;
-                          db.collection('${FirebaseAuth.instance.currentUser!.uid}').doc("user-expenses").collection('expenses').doc('$date').set({
-                            "exp_name" : _expenseController.text,
-                            "amount" : double.parse(_amountController.text),
-                            "date" : date,
-                            "userId" : FirebaseAuth.instance.currentUser!.uid,
-                            "userAmong" : []
-                          }).then((value) => print("Expense was added"));
-                          Navigator.pop(context);
+                      ),
+                      SizedBox(height: 10),
+                      Container(
+                          width: 250,
+                          // decoration: BoxDecoration(
+                          //   color: Colors.grey[200],
+                          //   border: Border.all(color: Colors.white),
+                          //   borderRadius: BorderRadius.circular(12),
+                          // ),
+                          child:  TextField(
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              controller: _amountController,
+                              decoration: InputDecoration(
+                                border: UnderlineInputBorder(),
+                                hintText: 'Amount',
+                              ),
+                            ),
 
-                        },
-                        child:Text("Add expense")
-                    ),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                          onPressed: () {
+                            final toBeAdded = [];
+                            for(int i=0;i<friends.length;i++){
+                              if(checked[i]==true){
+                                toBeAdded.add(friends[i]);
+                              }
+                            }
+                            int date = DateTime.now().microsecondsSinceEpoch;
+                            db.collection('${FirebaseAuth.instance.currentUser!.uid}').doc("user-expenses").collection('expenses').doc('$date').set({
+                              "exp_name" : _expenseController.text,
+                              "amount" : double.parse(_amountController.text),
+                              "date" : date,
+                              "userId" : FirebaseAuth.instance.currentUser!.uid,
+                              "userAmong" : toBeAdded
+                            }).then((value) => print("Expense was added"));
+                            Navigator.pop(context);
 
-                    for(var i=1;i<friends.length;i++)
-                      FriendsCheckBox(checked[i], friends[i], i),
+                          },
+                          child:Text("Add expense")
+                      ),
+                      ListView.builder(
+                            shrinkWrap: true,
+                              itemCount: friends.length,
+                              itemBuilder: (context,index){
+                                return FriendsCheckBox(checked[index], friends[index], index);
+                      })
 
-                  ],
+
+
+                      // for(var i=1;i<friends.length;i++)
+                      //   FriendsCheckBox(checked[i], friends[i], i),
+
+                    ],
+                  ),
                 )
-              ],
-            )
 
           ],
         )
@@ -156,14 +157,29 @@ class _AddExpenseState extends State<AddExpense> {
     );
   }
 
-  Widget FriendsCheckBox(bool value,String name, int index){
+  Widget FriendsCheckBox(bool value_bool,String name, int index){
     return Container(
-      child: Checkbox(
-        onChanged: (bool? value) {
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            child: Text(name),
+            width: 200,
+          ),
+          Checkbox(
+            onChanged: (bool? value) {
+              if(value_bool==true){
+                checked[index] = false;
+              }else {
+                checked[index] = true;
+              }
+              setState((){});
+            },
+            value: checked[index],
 
-        }, value: value,
-        
-      ),
+          ),
+        ],
+      )
     );
   }
 
@@ -180,13 +196,10 @@ class _AddExpenseState extends State<AddExpense> {
     for(var i=0;i<friends.length;i++){
       checked.add(false);
     }
-    for(int i=1;i<friends.length;i++){
-      both.add({friends[i]:checked[i]});
-    }
+    friends.removeAt(0);
+    checked.removeAt(0);
     setState((){});
-    print(checked);
-    print(friends);
-    print(both);
+
 
     // print("Hello");
   }

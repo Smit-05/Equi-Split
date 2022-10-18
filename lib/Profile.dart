@@ -33,6 +33,7 @@ class _ProfileState extends State<Profile> {
               top: size.height * 0.05,
               left: (size.width / 2) - 90,
               child: CircleAvatar(
+                backgroundImage: AssetImage('assets/images/img.png'),
                 backgroundColor: Colors.black54,
                 radius: 90,
               )
