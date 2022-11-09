@@ -5,7 +5,7 @@ Equi-Split is a bill splitting application that allows users to divide their bil
 ## Getting Started
 - Download the `.zip` file for this project and extract it.
 - Open it in `Android Studio`.
-- Run `pub pub get` to install dependencies.
+- Run `flutter pub get` to install dependencies.
 ### You're good to go 🤩
 
 ## Resources
